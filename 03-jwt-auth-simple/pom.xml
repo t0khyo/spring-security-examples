@@ -93,10 +93,11 @@
 
         <!-- JSON Web Token (JWT) support -->
         <dependency>
-            <groupId>com.auth0</groupId>
-            <artifactId>java-jwt</artifactId>
-            <version>4.0.0</version>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>9.40</version>
         </dependency>
+
 
         <!-- Development & Utility Libraries -->
 
