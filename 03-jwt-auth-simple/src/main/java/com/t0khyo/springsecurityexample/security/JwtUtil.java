@@ -7,28 +7,28 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.t0khyo.springsecurityexample.exception.InvalidSignatureException;
 import com.t0khyo.springsecurityexample.exception.TokenExpiredException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Component
-@RequiredArgsConstructor
 public class JwtUtil {
-    private final RSAPrivateKey privateKey;
-    private final RSAPublicKey publicKey;
-    private final long expiryDurationMinutes;
+    private final RSAKeyProperties rsaKeys;
+    private final JwtProperties jwtProperties;
+
+    public JwtUtil(RSAKeyProperties rsaKeys, JwtProperties jwtProperties) {
+        this.rsaKeys = rsaKeys;
+        this.jwtProperties = jwtProperties;
+    }
 
     public String generateToken(Authentication authentication) throws JOSEException {
         Instant now = Instant.now();
-        Instant expirationTime = Instant.now().plus(expiryDurationMinutes, ChronoUnit.MINUTES);
+        Instant expirationTime = Instant.now().plus(jwtProperties.tokenExpirationSeconds(), ChronoUnit.MINUTES);
 
         final String username = authentication.getName();
         final List<String> roles = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
@@ -36,13 +36,13 @@ public class JwtUtil {
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .subject(username)
                 .claim("roles", roles)
-                .issuer("t0khyo.io")
+                .issuer(jwtProperties.issuer())
                 .issueTime(Date.from(now))
                 .expirationTime(Date.from(expirationTime))
                 .jwtID(UUID.randomUUID().toString())
                 .build();
 
-        JWSSigner signer = new RSASSASigner(privateKey);
+        JWSSigner signer = new RSASSASigner(rsaKeys.privateKey());
 
         SignedJWT signedJWT = new SignedJWT(
                 new JWSHeader.Builder(JWSAlgorithm.RS256).type(JOSEObjectType.JWT).build(),
@@ -56,7 +56,7 @@ public class JwtUtil {
 
     public SignedJWT validateToken(String token) throws Exception {
         SignedJWT signedJWT = SignedJWT.parse(token);
-        JWSVerifier verifier = new RSASSAVerifier(publicKey);
+        JWSVerifier verifier = new RSASSAVerifier(rsaKeys.publicKey());
 
         if (!signedJWT.verify(verifier)) {
             throw new InvalidSignatureException("Invalid JWT signature");
@@ -66,7 +66,7 @@ public class JwtUtil {
         Date expirationTime = claims.getExpirationTime();
 
         if (expirationTime.before(new Date())) {
-            throw new TokenExpiredException("JWT token has expired");
+            throw new TokenExpiredException("JWT accessToken has expired");
         }
         return signedJWT;
     }

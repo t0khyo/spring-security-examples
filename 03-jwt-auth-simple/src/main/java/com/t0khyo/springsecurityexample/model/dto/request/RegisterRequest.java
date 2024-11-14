@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 @Builder
-public record UserRegistrationRequest(
+public record RegisterRequest(
         @NotBlank(message="{firstName.NotBlank}")
         String firstName,
         @NotBlank(message="{lastName.NotBlank}")

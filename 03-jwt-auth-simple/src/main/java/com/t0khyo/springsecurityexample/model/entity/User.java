@@ -34,9 +34,9 @@ public class User extends BaseEntity implements UserDetails, CredentialsContaine
     @Column(nullable=false)
     private String password;
 
-    private boolean accountNonExpired = true;
-    private boolean accountNonLocked = true;
-    private boolean credentialsNonExpired = true;
+//    private boolean accountNonExpired = true;
+//    private boolean accountNonLocked = true;
+//    private boolean credentialsNonExpired = true;
     private boolean enabled = true;
 
     @ManyToMany(fetch=FetchType.EAGER, cascade=CascadeType.MERGE)
@@ -64,17 +64,17 @@ public class User extends BaseEntity implements UserDetails, CredentialsContaine
 
     @Override
     public boolean isAccountNonExpired() {
-        return this.accountNonExpired;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return this.accountNonLocked;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return this.credentialsNonExpired;
+        return true;
     }
 
     @Override

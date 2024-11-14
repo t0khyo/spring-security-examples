@@ -32,14 +32,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
+        // 1. Decide whether the filter should be applied.
         final String authHeader = request.getHeader("Authorization");
-
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            logger.debug("No JWT token found in request headers or token format is invalid");
+            logger.warn("No JWT accessToken found in request headers or accessToken format is invalid.");
             filterChain.doFilter(request, response);
             return;
         }
 
+        // 2. Apply filter: authenticate or reject request
         final String jwt = authHeader.substring(7);
         final String username;
         final SignedJWT verifiedJwt;
@@ -67,9 +68,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (Exception ex) {
             logger.error("Token validation failed", ex);
-            throw new InvalidAccessTokenException("JWT token validation failed");
+            throw new InvalidAccessTokenException("JWT accessToken validation failed");
         }
 
+        // 3. Invoke the "rest" of the chain
         filterChain.doFilter(request, response);
+
+        // 4. No cleanup
     }
 }
