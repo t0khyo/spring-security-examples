@@ -28,7 +28,7 @@ public class JwtUtil {
 
     public String generateToken(Authentication authentication) throws JOSEException {
         Instant now = Instant.now();
-        Instant expirationTime = Instant.now().plus(jwtProperties.tokenExpirationSeconds(), ChronoUnit.MINUTES);
+        Instant expirationTime = Instant.now().plus(jwtProperties.tokenExpirationSeconds(), ChronoUnit.SECONDS);
 
         final String username = authentication.getName();
         final List<String> roles = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
